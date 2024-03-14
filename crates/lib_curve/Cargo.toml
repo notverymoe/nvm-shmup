@@ -1,11 +1,10 @@
 [package]
-name = "game"
+name = "nvm_curve"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy      = { workspace = true }
-nvm_curve = { workspace = true }
+bevy = { workspace = true }
 
 [lints]
 workspace = true

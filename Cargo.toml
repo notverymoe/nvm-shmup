@@ -1,8 +1,13 @@
 [workspace]
 resolver="2"
 members = [
+    "crates/lib_curve",
     "crates/game",
 ]
+
+[workspace.dependencies]
+bevy      = { version = "0.13.0", features = ["dynamic_linking"] }
+nvm_curve = { path = "crates/lib_curve" }
 
 [workspace.lints.clippy]
 all                            = "warn" 

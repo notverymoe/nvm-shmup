@@ -1761,6 +1761,7 @@ name = "game"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "nvm_curve",
 ]
 
 [[package]]
@@ -2500,6 +2501,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.52",
+]
+
+[[package]]
+name = "nvm_curve"
+version = "0.1.0"
+dependencies = [
+ "bevy",
 ]
 
 [[package]]
