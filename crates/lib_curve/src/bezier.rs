@@ -83,11 +83,11 @@ impl Curve for Bezier {
         }
     }
 
-    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32) {
+    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32, prepend: bool) {
         match self {
-            Bezier::Order1(v) => v.linearize(result, deviation_max),
-            Bezier::Order2(v) => v.linearize(result, deviation_max),
-            Bezier::Order3(v) => v.linearize(result, deviation_max),
+            Bezier::Order1(v) => v.linearize(result, deviation_max, prepend),
+            Bezier::Order2(v) => v.linearize(result, deviation_max, prepend),
+            Bezier::Order3(v) => v.linearize(result, deviation_max, prepend),
         }
     }
 

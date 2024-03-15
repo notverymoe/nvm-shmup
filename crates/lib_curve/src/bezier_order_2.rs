@@ -61,11 +61,11 @@ impl Curve for BezierOrder2 {
         ]
     }
 
-    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32) {
+    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32, prepend: bool) {
         // OPT this is a guess, improve it
         let point_estimation = 2 + (self.deviation_from_linear()/deviation_max).ceil() as usize;
         result.reserve(point_estimation);
-        result.push(self[0]);
+        if prepend { result.push(self[0]); }
         self.linearaize_internal(result, deviation_max);
     }
 
@@ -82,8 +82,8 @@ impl BezierOrder2 {
     fn linearaize_internal(&self, result: &mut Vec<Vec2>, deviation_max: f32) {
         if self.deviation_from_linear() > deviation_max {
             let parts = self.split(0.5);
-            parts[0].linearize(result, deviation_max);
-            parts[1].linearize(result, deviation_max);
+            parts[0].linearaize_internal(result, deviation_max);
+            parts[1].linearaize_internal(result, deviation_max);
         } else {
             result.push(self[2]);
         }

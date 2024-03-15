@@ -54,8 +54,12 @@ impl Curve for BezierOrder1 {
         [Self([self[0], mid]), Self([mid, self[1]])]
     }
 
-    fn linearize(&self, result: &mut Vec<Vec2>, _deviation_max: f32) {
-        result.extend_from_slice(&**self);
+    fn linearize(&self, result: &mut Vec<Vec2>, _deviation_max: f32, prepend: bool) {
+        if prepend { 
+            result.extend_from_slice(&**self);
+        } else {
+            result.push(self[1]);
+        }
     }
 
     fn length_bounds(&self) -> [f32; 2] {

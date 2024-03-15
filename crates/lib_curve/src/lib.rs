@@ -17,6 +17,6 @@ pub use bezier_order_3::*;
 pub trait Curve: Sized {
     fn interpolate(&self, t: f32) -> Vec2;
     fn split(&self, t: f32) -> [Self; 2];
-    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32);
+    fn linearize(&self, result: &mut Vec<Vec2>, deviation_max: f32, prepend: bool);
     fn length_bounds(&self) -> [f32; 2];
 }

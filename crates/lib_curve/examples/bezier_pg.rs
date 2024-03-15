@@ -77,7 +77,7 @@ fn main() {
 
                 // Curve
                 let mut points = Vec::default();
-                data.curve.linearize(&mut points, data.deviation);
+                data.curve.linearize(&mut points, data.deviation, true);
                 gizmos.linestrip_2d(points.iter().copied(), Color::YELLOW);
                 for point in points { gizmos.circle_2d(point, 4.0, Color::PINK); }
 
