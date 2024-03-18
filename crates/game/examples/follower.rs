@@ -3,7 +3,6 @@
 use bevy::{prelude::*, diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin}};
 use game::{path_follower_system, LoopBehaviour, Path, PathFollower};
 use nvm_curve::{Bezier, Curve};
-#[cfg(debug_assertions)] // debug/dev builds only
 
 fn main() {
     App::new()
