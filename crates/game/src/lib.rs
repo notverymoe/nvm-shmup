@@ -2,6 +2,3 @@
 
 mod path;
 pub use path::*;
-
-mod path_follower;
-pub use path_follower::*;
