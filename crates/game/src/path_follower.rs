@@ -7,29 +7,114 @@ use super::Path;
 #[derive(Debug, Clone, Component)]
 pub struct PathFollower {
     path:     Path,
-    last:     usize,
+    last:     Option<usize>,
     distance: f32,
     speed:    f32,
     position: Vec2,
+    forward:  bool,
+    loop_behaviour: LoopBehaviour,
+    loop_count: u32,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum LoopBehaviour {
+    None,
+    Forever,
+    ForeverReverse,
+    Count(u32),
+    CountReverse(u32),
+}
+
+impl LoopBehaviour {
+
+    #[must_use]
+    pub const fn get_max_loops(&self, loop_count: u32) -> Option<u32> {
+        match self {
+            LoopBehaviour::None                => Some(0),
+            LoopBehaviour::Forever             => None,
+            LoopBehaviour::Count(count)        => Some(count.saturating_sub(loop_count)),
+            LoopBehaviour::ForeverReverse      => None,
+            LoopBehaviour::CountReverse(count) => Some(count.saturating_sub(loop_count)),
+        }
+    }
+
+    #[must_use]
+    pub const fn get_should_reverse(&self) -> bool {
+        match self {
+            LoopBehaviour::None            => false,
+            LoopBehaviour::Forever         => false,
+            LoopBehaviour::Count(_)        => false,
+            LoopBehaviour::ForeverReverse  => true,
+            LoopBehaviour::CountReverse(_) => true,
+        }
+    }
+
 }
 
 impl PathFollower {
 
     #[must_use]
-    pub fn new(path: Path, speed: f32) -> Self {
+    pub fn new(path: Path, speed: f32, forward: bool, loop_behaviour: LoopBehaviour) -> Self {
         Self {
             position: path.start(),
             path,
             speed,
-            last: 0,
+            forward,
+            loop_behaviour,
+            last: None,
+            loop_count: 0,
             distance: 0.0,
         }
     }
 
     pub fn reset(&mut self) {
-        self.last     = 0;
-        self.distance = 0.0;
-        self.position = self.path.start();
+        self.last       = None;
+        self.distance   = 0.0;
+        self.position   = self.path.start();
+        self.loop_count = 0;
+    }
+
+    // Forward //
+    #[must_use] 
+    pub const fn forward(&self) -> bool {
+        self.forward
+    }
+ 
+    pub fn set_forward(&mut self, forward: bool) {
+        // TODO recalculate state
+        self.forward = forward;
+    }
+
+    // Loop Behaviour //
+
+    #[must_use] 
+    pub const fn loop_behaviour(&self) -> LoopBehaviour {
+        self.loop_behaviour
+    }
+
+    #[must_use] 
+    pub fn loop_behaviour_mut(&mut self) -> &mut LoopBehaviour {
+        &mut self.loop_behaviour
+    }
+ 
+    pub fn set_loop_behaviour(&mut self, loop_behaviour: LoopBehaviour) {
+        self.loop_behaviour = loop_behaviour;
+    }
+
+    // Loop Count //
+
+    #[must_use] 
+    pub const fn loop_count(&self) -> u32 {
+        self.loop_count
+    }
+
+    #[must_use] 
+    pub fn loop_count_mut(&mut self) -> &mut u32 {
+        &mut self.loop_count
+    }
+ 
+    pub fn set_loop_count(&mut self, count: u32) {
+        self.loop_count = count;
     }
 
     // Speed //
@@ -57,28 +142,23 @@ impl PathFollower {
 
     pub fn set_distance(&mut self, distance: f32) {
         self.distance = distance;
-        let (position, last) = self.path.get_position(0, distance);
-        self.last     = last;
-        self.position = position;
+        let result    = self.path.find_position(None, distance, self.forward, self.loop_behaviour.get_max_loops(0), self.loop_behaviour.get_should_reverse());
+        self.last     = Some(result.index);
+        self.position = result.position;
+        self.distance = result.distance;
     }
 
     // Last //
 
     #[must_use] 
     pub fn segment_current(&self) -> [Vec2; 2] {
-        self.path.segment(self.last).unwrap_or_else(|| [self.path.end(), self.path.end()])
+        self.path.segment(self.path.resolve_hint(self.last, self.forward), self.forward).unwrap()
     }
 
     #[must_use] 
     pub const fn segment_current_idx(&self) -> usize {
-        self.last
+        self.path.resolve_hint(self.last, self.forward)
     }
-
-    #[must_use] 
-    pub const fn at_end(&self) -> bool {
-        self.last > self.path.len()
-    }
-
 
     // Path //
 
@@ -92,16 +172,33 @@ impl PathFollower {
     #[must_use] 
     pub const fn position(&self) -> Vec2 {
         self.position
+    } 
+
+    // Helpers //
+
+    pub fn advance(&mut self, delta_t: f32) {
+        self.distance += self.speed * delta_t;
+        let result = self.path.find_position(
+            self.last, 
+            self.distance, 
+            self.forward,
+            self.loop_behaviour.get_max_loops(self.loop_count),
+            self.loop_behaviour.get_should_reverse(),
+        );
+        self.position    = result.position;
+        self.last        = Some(result.index);
+        self.distance    = result.distance;
+        self.loop_count += result.loops;
+        self.forward     = result.forward;
     }
 
 }
 
 pub fn path_follower_system(mut q_followers: Query<&mut PathFollower>, time: Res<Time>) {
-    let delta = time.delta_seconds();
+    let delta_t = time.delta_seconds();
     for mut follower in &mut q_followers {
-        follower.distance += follower.speed*delta;
-        let (position, last) = follower.path.get_position(follower.last, follower.distance);
-        follower.position = position;
-        follower.last     = last;
+        if follower.speed > 0.0 {
+            follower.advance(delta_t);
+        }
     }
 }

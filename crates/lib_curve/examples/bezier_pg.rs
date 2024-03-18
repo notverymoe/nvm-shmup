@@ -78,18 +78,18 @@ fn main() {
                 // Curve
                 let mut points = Vec::default();
                 data.curve.linearize(&mut points, data.deviation, true);
-                gizmos.linestrip_2d(points.iter().copied(), Color::YELLOW);
-                for point in points { gizmos.circle_2d(point, 4.0, Color::PINK); }
+                gizmos.linestrip_2d(points.iter().copied(), Color::linear_rgb(1.0, 1.0, 0.0));
+                for point in points { gizmos.circle_2d(point, 4.0, Color::linear_rgb(1.0, 0.5, 0.5)); }
 
                 // Points
                 for (i, point) in data.curve.iter().copied().enumerate() {
                     gizmos.circle_2d(point, 8.0, if i == 0 || i == data.curve.len()-1 {
-                        Color::RED
+                        Color::linear_rgb(1.0, 0.0, 0.0)
                     } else {
-                        Color::ORANGE
+                        Color::linear_rgb(1.0, 0.5, 0.0)
                     });
                 }
-                gizmos.circle_2d(data.curve[data.selected], 12.0, Color::YELLOW);
+                gizmos.circle_2d(data.curve[data.selected], 12.0, Color::linear_rgb(1.0, 1.0, 0.0));
             }
         })
         .run();

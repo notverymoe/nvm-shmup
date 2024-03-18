@@ -1,7 +1,7 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
 use bevy::prelude::*;
-use game::{path_follower_system, Path, PathFollower};
+use game::{path_follower_system, LoopBehaviour, Path, PathFollower};
 use nvm_curve::{Bezier, Curve};
 
 fn main() {
@@ -10,15 +10,15 @@ fn main() {
         .add_systems(PreUpdate, path_follower_system)
         .add_systems(Update, |q_followers: Query<&PathFollower>, mut gizmos: Gizmos| {
             for follower in &q_followers {
-                gizmos.circle_2d(follower.position(), 2.0, Color::YELLOW);
-                for (i, [from, to]) in follower.path().segments().enumerate() {
-                    gizmos.line_2d(from, to, if i == follower.segment_current_idx() { Color::GREEN } else { Color::DARK_GREEN });
+                gizmos.circle_2d(follower.position(), 2.0, Color::linear_rgb(1.0, 1.0, 0.0));
+                for (i, [from, to]) in follower.path().segments(true).enumerate() {
+                    gizmos.line_2d(from, to, if i == follower.segment_current_idx() { Color::linear_rgb(0.0, 1.0, 0.0) } else { Color::linear_rgb(0.0, 0.25, 0.0) });
                 }
             }
         })
         .add_systems(Startup, |mut commands: Commands| {
             commands.spawn(Camera2dBundle::default());
-            commands.spawn(PathFollower::new(create_path(), 32.0,));
+            commands.spawn(PathFollower::new(create_path(), 512.0, false, LoopBehaviour::ForeverReverse));
         })
         .run();
 }
