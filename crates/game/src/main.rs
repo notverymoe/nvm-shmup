@@ -47,7 +47,7 @@ pub fn setup(
             mesh: meshes.add(Prism{
                 radius: 0.5,
                 sides:  3,
-                depth:  1.0,
+                depth:  0.5,
             }),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             material: materials.add(Color::from(Colours::RED)),
