@@ -155,9 +155,10 @@ pub fn calculate_frustrum_from_planes(
 
     let dir = Vec3::new(
         0.5*plane_b.size*aspect_ratio - 0.5*plane_a.size*aspect_ratio,
-        0.5*plane_b.size        - 0.5*plane_a.size,
-        plane_b.distance        - plane_a.distance,
+        0.5*plane_b.size              - 0.5*plane_a.size,
+        plane_b.distance              - plane_a.distance,
     ).normalize();
+    assert!(dir.x >= 0.0 && dir.y >= 0.0);
 
     if dir.x == 0.0 && dir.y == 0.0 {
         let right = 0.5*plane_a.size*aspect_ratio;

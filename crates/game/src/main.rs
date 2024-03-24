@@ -1,14 +1,13 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
 use bevy::prelude::*;
-use game::{collider_renderer, GameCameraBundle, Plane, PlayerBundle, PluginsGameCamera, PluginPlayer, ProjectionGame};
+use game::{GameCameraBundle, Plane, PlayerBundle, PluginsGameCamera, PluginPlayer, ProjectionGame};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(PluginsGameCamera)
         .add_plugins(PluginPlayer)
-        .add_systems(PostUpdate, collider_renderer)
         .add_systems(Startup, |mut commands: Commands|{
             commands.spawn((
                 GameCameraBundle{

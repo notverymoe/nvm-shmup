@@ -105,13 +105,3 @@ impl Plugin for PluginPlayer {
             .add_systems(Update, (update_keyboard_input, update_player_movement).chain());
     }
 }
-
-pub fn collider_renderer(q_colliders: Query<&Collider>, mut gizmos: Gizmos) {
-    q_colliders.iter().for_each(|collider|{
-        match collider.bounds {
-            Bounds::Circle(radius)         => { gizmos.circle(collider.position.extend(0.0), Dir3::Z, radius, Color::linear_rgb(1.0, 0.0, 0.0)); }
-            Bounds::BoxAligned(size)       => { gizmos.rect(collider.position.extend(0.0), Quat::IDENTITY, size*2.0, Color::linear_rgb(0.0, 1.0, 0.0)); }
-            Bounds::BoxOriented(size, dir) => { gizmos.rect(collider.position.extend(0.0), Quat::from_axis_angle(Vec3::Z, dir.to_angle()), size*2.0, Color::linear_rgb(0.0, 0.0, 1.0)); }
-        }
-    });
-}
