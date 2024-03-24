@@ -42,7 +42,7 @@ pub struct PlayerController {
 impl Default for PlayerController {
     fn default() -> Self {
         Self { 
-            move_speed: 100.0,
+            move_speed: 20.0,
         }
     }
 }

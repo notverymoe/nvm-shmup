@@ -8,3 +8,6 @@ pub use player::*;
 
 mod camera;
 pub use camera::*;
+
+mod prism;
+pub use prism::*;

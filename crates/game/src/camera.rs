@@ -9,8 +9,8 @@ use bevy::{
     math::AspectRatio, 
     prelude::*, 
     render::{
-        camera::{CameraMainTextureUsages, CameraProjection, CameraProjectionPlugin, CameraRenderGraph, CameraUpdateSystem, Exposure, ScalingMode}, 
-        primitives::Frustum, view::{ColorGrading, VisibleEntities}
+        camera::{camera_system, CameraMainTextureUsages, CameraProjection, CameraProjectionPlugin, CameraRenderGraph, CameraUpdateSystem, Exposure, ScalingMode}, 
+        primitives::Frustum, view::{check_visibility, update_frusta, ColorGrading, VisibilitySystems, VisibleEntities}
     }, 
     transform::TransformSystem
 };
@@ -21,9 +21,16 @@ impl Plugin for PluginGameCamera {
     fn build(&self, app: &mut App) {
         app.add_systems(
             PostUpdate, 
-            update_game_camera
-                .before(TransformSystem::TransformPropagate)
-                .after(CameraUpdateSystem)
+            (
+                update_game_camera
+                    .before(TransformSystem::TransformPropagate)
+                    .after(CameraUpdateSystem),
+                update_frusta::<ProjectionGame>
+                    .in_set(VisibilitySystems::UpdateProjectionFrusta)
+                    .after(camera_system::<ProjectionGame>)
+                    .after(TransformSystem::TransformPropagate)
+                    .before(check_visibility),
+            )
         );
     }
 }
