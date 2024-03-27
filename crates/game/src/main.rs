@@ -1,9 +1,11 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
+use core::f32::consts::TAU;
+
 use bevy::{
     color::palettes::css as Colours, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame, Collider};
+use game::{calculate_ship_orientation_target, interp_orientation, Collider, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame};
 
 fn main() {
     App::new()
@@ -11,13 +13,11 @@ fn main() {
         .add_plugins(PluginsGameCamera)
         .add_plugins(PluginPlayer)
         .add_systems(Startup, setup)
-        .add_systems(PostUpdate, |mut q: Query<(&mut Transform, &Collider)>| {
+        .add_systems(PostUpdate, |mut q: Query<(&mut Transform, &Collider)>, time: Res<Time>| {
             q.iter_mut().for_each(|(mut t, c)| {
                 let delta = t.translation.truncate() - c.position;
-                let tilt = delta.normalize_or_zero();
                 t.translation = c.position.extend(0.0);
-                t.rotation = Quat::from_axis_angle(Vec3::Y, -core::f32::consts::FRAC_PI_4*tilt.x) 
-                           * Quat::from_axis_angle(Vec3::X,  core::f32::consts::FRAC_PI_4*tilt.y);
+                t.rotation = interp_orientation(t.rotation, calculate_ship_orientation_target(delta), 2.0*TAU*time.delta_seconds());
             });
         })
         .run();
@@ -45,7 +45,7 @@ pub fn setup(
         PlayerBundle::default(),
         PbrBundle {
             mesh: meshes.add(Prism{
-                radius: 0.5,
+                radius: 0.75,
                 sides:  3,
                 depth:  0.5,
             }),

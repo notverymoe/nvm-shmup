@@ -11,3 +11,9 @@ pub use camera::*;
 
 mod prism;
 pub use prism::*;
+
+mod interp;
+pub use interp::*;
+
+mod util;
+pub use util::*;
