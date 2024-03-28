@@ -1,6 +1,7 @@
 [workspace]
 resolver="2"
 members = [
+    "crates/lib_collide",
     "crates/lib_curve",
     "crates/game",
 ]
