@@ -1,13 +1,17 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use bevy::prelude::*;
+use bevy::{prelude::*, color::palettes::css as Colors};
+
+use crate::{BundleProjectile, DamageSink, TeamPlayer, Transform2D, TransformSync};
 
 #[derive(Debug, Default, Bundle)]
 pub struct PlayerBundle {
     pub input_config: PlayerInputConfig,
     pub input:        PlayerInput,
     pub controller:   PlayerController,
-    pub collider:     Collider,
+    pub damage_sink:  DamageSink, 
+    pub transform:    Transform2D,
+    pub fire_cooldown: PlayerWeaponCooldown, 
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -85,6 +89,7 @@ pub struct PlayerInputConfig {
     pub gamepad: Option<Gamepad>,
     pub axis_x: Vec<InputAxis>,
     pub axis_y: Vec<InputAxis>,
+    pub fire:   Vec<InputButton>,
 }
 
 impl Default for PlayerInputConfig {
@@ -114,6 +119,10 @@ impl Default for PlayerInputConfig {
                 ], [1.0, -1.0]),
                 InputAxis::Axis(GamepadAxisType::LeftStickY),
             ],
+            fire: vec![
+                InputButton::KeyCode(KeyCode::Space),
+                InputButton::GamepadButton(GamepadButtonType::East),
+            ]
         }
     }
 }
@@ -121,6 +130,7 @@ impl Default for PlayerInputConfig {
 #[derive(Debug, Default, Component)]
 pub struct PlayerInput {
     pub move_dir: Vec2,
+    pub fire:     bool,
 }
 
 #[derive(Debug, Component)]
@@ -134,28 +144,6 @@ impl Default for PlayerController {
             move_speed: 20.0,
         }
     }
-}
-
-#[derive(Debug, Component)]
-pub struct Collider {
-    pub position: Vec2,
-    pub bounds: Bounds,
-}
-
-impl Default for Collider {
-    fn default() -> Self {
-        Self { 
-            position: Vec2::ZERO,
-            bounds: Bounds::Circle(0.5),
-        }
-    }
-}
-
-#[derive(Debug)]
-pub enum Bounds {
-    Circle(f32),
-    BoxAligned(Vec2),
-    BoxOriented(Vec2, Vec2),
 }
 
 pub fn prepare_player_input(mut q_player: Query<&mut PlayerInput>) {
@@ -174,6 +162,7 @@ pub fn update_keyboard_input(
             config.axis_y.iter().map(|a| a.get(&button_kb, &button_gp, &axis_gp, config.gamepad)).sum::<f32>()
         );
         player.move_dir += if config.force_digital { axes_digital(move_dir, 0.2) } else { move_dir };
+        player.fire = config.fire.iter().any(|v| v.pressed(&button_kb, &button_gp, &axis_gp, config.gamepad));
     });
 }
 
@@ -190,12 +179,48 @@ fn normalize_axis(amount: f32) -> f32 {
 }
 
 pub fn update_player_movement(
-    mut q_player: Query<(&mut Collider, &PlayerController, &PlayerInput)>,
+    mut q_player: Query<(&mut Transform2D, &PlayerController, &PlayerInput)>,
     time: Res<Time>,
 ) {
-    q_player.iter_mut().for_each(|(mut collider, controller, input)| {
+    q_player.iter_mut().for_each(|(mut transform, controller, input)| {
         if let Some(move_dir) = input.move_dir.try_normalize() {
-            collider.position += move_dir * controller.move_speed * time.delta_seconds();
+            transform.position.move_rel(move_dir * controller.move_speed * time.delta_seconds());
+        }
+    });
+}
+
+#[derive(Debug, Default, Clone, Copy, Component)]
+pub struct PlayerWeaponCooldown {
+    pub accum: f32,
+}
+
+pub fn update_player_firing(
+    mut q_player: Query<(&mut PlayerWeaponCooldown, &Transform2D, &PlayerInput)>,
+    mut commands: Commands,
+    time: Res<Time>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
+    q_player.iter_mut().for_each(|(mut cooldown, transform, input)| {
+        if cooldown.accum > 0.0 {
+            cooldown.accum = (cooldown.accum - time.delta_seconds()).max(0.0);
+            if cooldown.accum > 0.0 {
+                return;
+            }
+        }
+
+        if input.fire {
+            cooldown.accum = 0.1;
+            commands.spawn((
+                BundleProjectile::bullet(TeamPlayer, transform.position.target, Vec2::Y * 100.0, 0.25, 1),
+                PbrBundle { // TODO improve on this
+                    mesh: meshes.add(Sphere::new(0.125)),
+                    transform: Transform::from_translation(transform.position.target.extend(0.0)),
+                    material: materials.add(Color::from(Colors::BLUE)),
+                    ..default()
+                },
+                TransformSync
+            ));
         }
     });
 }
@@ -206,6 +231,6 @@ impl Plugin for PluginPlayer {
     fn build(&self, app: &mut App) {
         app
             .add_systems(First,  prepare_player_input)
-            .add_systems(Update, (update_keyboard_input, update_player_movement).chain());
+            .add_systems(Update, (update_keyboard_input, update_player_movement, update_player_firing).chain());
     }
 }

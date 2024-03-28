@@ -4,6 +4,7 @@ use bevy::prelude::Vec2;
 
 use crate::prelude::{RayTarget, RayCaster, RayIntersection, ShapeDebug, ShapeDebugData, get_polygon_data_for_ramp_boxy, PolygonSmall, BoxAligned, ShapeCommon};
 
+#[derive(Debug, Clone, Copy)]
 pub struct RampBoxy(PolygonSmall);
 
 impl RampBoxy {

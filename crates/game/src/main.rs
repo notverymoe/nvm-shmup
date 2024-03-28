@@ -5,22 +5,29 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colours, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{calculate_ship_orientation_target, interp_orientation, Collider, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame};
+use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, Transform2D};
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(PluginsGameCamera)
         .add_plugins(PluginPlayer)
+        .add_plugins(PluginTransform)
+        .add_plugins(PluginProjectile)
         .add_systems(Startup, setup)
-        .add_systems(PostUpdate, |mut q: Query<(&mut Transform, &Collider)>, time: Res<Time>| {
-            q.iter_mut().for_each(|(mut t, c)| {
-                let delta = t.translation.truncate() - c.position;
-                t.translation = c.position.extend(0.0);
-                t.rotation = interp_orientation(t.rotation, calculate_ship_orientation_target(delta), 2.0*TAU*time.delta_seconds());
-            });
-        })
+        .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
+}
+
+pub fn update_tilt(
+    mut q: Query<(&mut Transform, &Transform2D)>, 
+    time: Res<Time>,
+) {
+    q.iter_mut().for_each(|(mut t, c)| {
+        let delta = c.position.current - c.position.target;
+        t.translation = c.position.current.extend(0.0);
+        t.rotation = interp_orientation(t.rotation, calculate_ship_orientation_target(delta), 2.0*TAU*time.delta_seconds());
+    });
 }
 
 pub fn setup(

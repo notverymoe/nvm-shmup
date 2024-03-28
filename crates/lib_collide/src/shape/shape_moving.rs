@@ -7,7 +7,7 @@ use enum_derive_2018::EnumFromInner;
 use crate::prelude::*;
 
 macro_attr! {
-    #[derive(EnumFromInner!)]
+    #[derive(EnumFromInner!, Debug, Clone, Copy)]
     pub enum ShapeMoving {
         Ball(Ball),
         BoxAligned(BoxAligned),

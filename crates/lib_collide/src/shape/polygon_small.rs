@@ -8,6 +8,7 @@ use crate::prelude::{RayTarget, ShapeDebug, RayCaster, RayIntersection, ShapeDeb
 
 pub const POLYGON_SMALL_CAPACITY: usize = 8;
 
+#[derive(Debug, Clone, Copy)]
 pub struct PolygonSmall {
     pub(super) points:  ArrayVec<[Vec2; POLYGON_SMALL_CAPACITY]>,
     pub(super) normals: ArrayVec<[Vec2; POLYGON_SMALL_CAPACITY]>,

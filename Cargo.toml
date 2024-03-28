@@ -7,8 +7,9 @@ members = [
 ]
 
 [workspace.dependencies]
-bevy      = { git = "https://github.com/bevyengine/bevy.git", rev = "1323de7cd74ba7a6fe801e0fa47c357b7760b049", features = ["dynamic_linking"] }
-nvm_curve = { path = "crates/lib_curve" }
+bevy        = { git = "https://github.com/bevyengine/bevy.git", rev = "1323de7cd74ba7a6fe801e0fa47c357b7760b049", features = ["dynamic_linking"] }
+nvm_curve   = { path = "crates/lib_curve" }
+nvm_collide = { path = "crates/lib_collide" }
 
 [workspace.lints.clippy]
 all                            = "warn" 

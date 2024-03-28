@@ -5,6 +5,7 @@ use bevy::prelude::Vec2;
 use crate::prelude::{RayTarget, RayCaster, RayIntersection, ShapeDebug, ShapeDebugData, PolygonSmallRound, ShapeCommon, BoxAligned};
 use super::get_polygon_data_for_oriented_rect_rected;
 
+#[derive(Debug, Clone, Copy)]
 pub struct BoxOrientedBoxyRound(PolygonSmallRound);
 
 impl BoxOrientedBoxyRound {

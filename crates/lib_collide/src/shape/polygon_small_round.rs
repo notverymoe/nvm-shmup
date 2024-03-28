@@ -4,6 +4,7 @@ use bevy::prelude::Vec2;
 
 use crate::prelude::{RayTarget, ShapeDebug, RayCaster, RayIntersection, ShapeDebugData, PolygonSmall, BoxAligned, ShapeCommon};
 
+#[derive(Debug, Clone, Copy)]
 pub struct PolygonSmallRound {
     inner: PolygonSmall,
     radius: f32,
