@@ -6,12 +6,13 @@ use crate::{BundleProjectile, DamageSink, TeamPlayer, Transform2D, TransformSync
 
 #[derive(Debug, Default, Bundle)]
 pub struct PlayerBundle {
-    pub input_config: PlayerInputConfig,
-    pub input:        PlayerInput,
-    pub controller:   PlayerController,
-    pub damage_sink:  DamageSink, 
-    pub transform:    Transform2D,
+    pub input_config:  PlayerInputConfig,
+    pub input:         PlayerInput,
+    pub controller:    PlayerController,
+    pub damage_sink:   DamageSink, 
+    pub transform:     Transform2D,
     pub fire_cooldown: PlayerWeaponCooldown, 
+    pub team:          TeamPlayer,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -184,7 +185,7 @@ pub fn update_player_movement(
 ) {
     q_player.iter_mut().for_each(|(mut transform, controller, input)| {
         if let Some(move_dir) = input.move_dir.try_normalize() {
-            transform.position.move_rel(move_dir * controller.move_speed * time.delta_seconds());
+            transform.position.current += move_dir * controller.move_speed * time.delta_seconds();
         }
     });
 }
@@ -212,10 +213,10 @@ pub fn update_player_firing(
         if input.fire {
             cooldown.accum = 0.1;
             commands.spawn((
-                BundleProjectile::bullet(TeamPlayer, transform.position.target, Vec2::Y * 100.0, 0.25, 1),
+                BundleProjectile::bullet(TeamPlayer, transform.position.current, Vec2::Y * 100.0, 0.25, 1),
                 PbrBundle { // TODO improve on this
                     mesh: meshes.add(Sphere::new(0.125)),
-                    transform: Transform::from_translation(transform.position.target.extend(0.0)),
+                    transform: Transform::from_translation(transform.position.current.extend(0.0)),
                     material: materials.add(Color::from(Colors::BLUE)),
                     ..default()
                 },

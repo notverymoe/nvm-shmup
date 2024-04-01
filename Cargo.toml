@@ -7,7 +7,7 @@ members = [
 ]
 
 [workspace.dependencies]
-bevy        = { git = "https://github.com/bevyengine/bevy.git", rev = "1323de7cd74ba7a6fe801e0fa47c357b7760b049", features = ["dynamic_linking"] }
+bevy        = { git = "https://github.com/bevyengine/bevy.git", rev = "90845267947fc6f1de6780048d4d552235bbb093", features = ["dynamic_linking"] }
 nvm_curve   = { path = "crates/lib_curve" }
 nvm_collide = { path = "crates/lib_collide" }
 

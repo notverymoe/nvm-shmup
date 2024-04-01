@@ -3,9 +3,9 @@
 use core::f32::consts::TAU;
 
 use bevy::{
-    color::palettes::css as Colours, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
+    color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, Transform2D};
+use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, update_projectiles_linear, BundleProjectile, DamageSink, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, TeamEnemy, Transform2D, TransformSync};
 
 fn main() {
     App::new()
@@ -15,6 +15,29 @@ fn main() {
         .add_plugins(PluginTransform)
         .add_plugins(PluginProjectile)
         .add_systems(Startup, setup)
+        .add_systems(PreUpdate, (|
+            mut commands: Commands, 
+            mut meshes: ResMut<Assets<Mesh>>,
+            mut materials: ResMut<Assets<StandardMaterial>>,
+            time: Res<Time>, 
+            mut accum: Local<f32>,
+        | {
+            *accum += time.delta_seconds();
+            if *accum < 0.2 { return; }
+            *accum -= 0.2;
+
+            commands.spawn((
+                BundleProjectile::bullet(TeamEnemy, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y, 0.25, 1),
+                PbrBundle { // TODO improve on this
+                    mesh: meshes.add(Sphere::new(0.125)),
+                    transform: Transform::from_translation(Vec2::new(0.0, 0.0).extend(0.0)),
+                    material: materials.add(Color::from(Colors::RED)),
+                    ..default()
+                },
+                TransformSync
+            ));
+            
+        }))
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
 }
@@ -24,9 +47,9 @@ pub fn update_tilt(
     time: Res<Time>,
 ) {
     q.iter_mut().for_each(|(mut t, c)| {
-        let delta = c.position.current - c.position.target;
+        let delta     = c.position.current - c.position.previous;
         t.translation = c.position.current.extend(0.0);
-        t.rotation = interp_orientation(t.rotation, calculate_ship_orientation_target(delta), 2.0*TAU*time.delta_seconds());
+        t.rotation    = interp_orientation(t.rotation, calculate_ship_orientation_target(delta), 2.0*TAU*time.delta_seconds());
     });
 }
 
@@ -49,7 +72,13 @@ pub fn setup(
     ));
 
     commands.spawn((
-        PlayerBundle::default(),
+        PlayerBundle {
+            damage_sink: DamageSink {
+                shape: game::Shape::Circle(0.75),
+                ..default()
+            },
+            ..default()
+        },
         PbrBundle {
             mesh: meshes.add(Prism{
                 radius: 0.75,
@@ -57,7 +86,7 @@ pub fn setup(
                 depth:  0.5,
             }),
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            material: materials.add(Color::from(Colours::RED)),
+            material: materials.add(Color::from(Colors::RED)),
             ..default()
         }
     ));
