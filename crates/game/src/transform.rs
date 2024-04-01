@@ -18,10 +18,12 @@ impl Position2D {
         self.previous = self.current;
     }
 
+    #[must_use]
     pub fn delta(&self) -> Vec2 {
         self.current - self.previous
     }
 
+    #[must_use]
     pub fn delta_as_bearing(&self) -> (Vec2, f32) {
         let delta     = self.current - self.previous;
         let distance  = delta.length();

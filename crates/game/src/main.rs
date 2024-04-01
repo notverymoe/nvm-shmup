@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, update_projectiles_linear, BundleProjectile, DamageSink, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, TeamEnemy, Transform2D, TransformSync};
+use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, BundleProjectile, DamageSink, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, TeamEnemy, Transform2D, TransformSync};
 
 fn main() {
     App::new()
@@ -15,7 +15,7 @@ fn main() {
         .add_plugins(PluginTransform)
         .add_plugins(PluginProjectile)
         .add_systems(Startup, setup)
-        .add_systems(PreUpdate, (|
+        .add_systems(PreUpdate, |
             mut commands: Commands, 
             mut meshes: ResMut<Assets<Mesh>>,
             mut materials: ResMut<Assets<StandardMaterial>>,
@@ -37,7 +37,7 @@ fn main() {
                 TransformSync
             ));
             
-        }))
+        })
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
 }
