@@ -2,14 +2,14 @@
 
 use bevy::{prelude::*, color::palettes::css as Colors};
 
-use crate::{BundleProjectile, DamageSink, TeamPlayer, Transform2D, TransformSync};
+use crate::{BundleProjectile, DamageTarget, TeamPlayer, Transform2D, TransformSync};
 
 #[derive(Debug, Default, Bundle)]
 pub struct PlayerBundle {
     pub input_config:  PlayerInputConfig,
     pub input:         PlayerInput,
     pub controller:    PlayerController,
-    pub damage_sink:   DamageSink, 
+    pub damage_sink:   DamageTarget, 
     pub transform:     Transform2D,
     pub fire_cooldown: PlayerWeaponCooldown, 
     pub team:          TeamPlayer,
@@ -215,7 +215,7 @@ pub fn update_player_firing(
             commands.spawn((
                 BundleProjectile::bullet(TeamPlayer, transform.position.current, Vec2::Y * 100.0, 0.25, 1),
                 PbrBundle { // TODO improve on this
-                    mesh: meshes.add(Sphere::new(0.125)),
+                    mesh: meshes.add(Sphere::new(0.25)),
                     transform: Transform::from_translation(transform.position.current.extend(0.0)),
                     material: materials.add(Color::from(Colors::BLUE)),
                     ..default()

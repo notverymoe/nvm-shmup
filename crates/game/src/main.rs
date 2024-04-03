@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, BundleProjectile, DamageSink, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, TeamEnemy, Transform2D, TransformSync};
+use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, BundleProjectile, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, TeamEnemy, Transform2D, TransformSync};
 
 fn main() {
     App::new()
@@ -29,7 +29,7 @@ fn main() {
             commands.spawn((
                 BundleProjectile::bullet(TeamEnemy, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y, 0.25, 1),
                 PbrBundle { // TODO improve on this
-                    mesh: meshes.add(Sphere::new(0.125)),
+                    mesh: meshes.add(Sphere::new(0.25)),
                     transform: Transform::from_translation(Vec2::new(0.0, 0.0).extend(0.0)),
                     material: materials.add(Color::from(Colors::RED)),
                     ..default()
@@ -61,27 +61,28 @@ pub fn setup(
     commands.spawn((
         GameCameraBundle{
             projection: ProjectionGame{
-                planes_a: Plane::new(  0.0, 160.0),
-                planes_b: Plane::new(100.0, 320.0),
+                planes_a: Plane::new( 0.0, Vec2::new(100.0, 100.0)),
+                planes_b: Plane::new(50.0, Vec2::new(150.0, 150.0)),
                 near: 0.1,
-                far:  1000.0,
+                far:  200.0,
                 ..default()
             },
             ..default()
         },
+        ProjectionGameDebug,
     ));
 
     commands.spawn((
         PlayerBundle {
-            damage_sink: DamageSink {
-                shape: game::Shape::Circle(0.75),
+            damage_sink: DamageTarget {
+                shape: game::Shape::Circle(2.0),
                 ..default()
             },
             ..default()
         },
         PbrBundle {
             mesh: meshes.add(Prism{
-                radius: 0.75,
+                radius: 2.0,
                 sides:  3,
                 depth:  0.5,
             }),

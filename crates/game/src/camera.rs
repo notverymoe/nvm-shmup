@@ -12,6 +12,7 @@ use bevy::{
         camera::{camera_system, CameraMainTextureUsages, CameraProjection, CameraProjectionPlugin, CameraRenderGraph, CameraUpdateSystem, Exposure, ScalingMode}, 
         primitives::Frustum, view::{check_visibility, update_frusta, ColorGrading, VisibilitySystems, VisibleEntities}
     }, 
+    color::palettes::css as Colors,
     transform::TransformSystem
 };
 
@@ -30,6 +31,9 @@ impl Plugin for PluginGameCamera {
                     .after(camera_system::<ProjectionGame>)
                     .after(TransformSystem::TransformPropagate)
                     .before(check_visibility),
+                #[cfg(debug_assertions)]
+                debug_projection_game
+                    .after(TransformSystem::TransformPropagate)
             )
         );
     }
@@ -92,17 +96,29 @@ impl Default for GameCameraBundle {
 #[derive(Debug, Clone, Copy, Reflect)]
 pub struct Plane {
     pub distance: f32,
-    pub size:     f32,
+    pub size:     Vec2,
 }
 
 impl Plane {
     
     #[must_use]
-    pub const fn new(distance: f32, size: f32) -> Self {
+    pub const fn new(distance: f32, size: Vec2) -> Self {
         Self{distance, size}
     }
 
 }
+
+#[derive(Debug, Clone, Copy, Component)]
+pub struct ProjectionGameDebug;
+
+pub fn debug_projection_game(q: Query<(&ProjectionGame, &GlobalTransform)>, mut gizmos: Gizmos) {
+    q.iter().for_each(|(p, t)| {
+        let pos = t.translation().truncate();
+        gizmos.rect(pos.extend(-p.planes_a.distance), Quat::IDENTITY, p.planes_a.size, Colors::RED   );
+        gizmos.rect(pos.extend(-p.planes_b.distance), Quat::IDENTITY, p.planes_b.size, Colors::ORANGE);
+    });
+}
+
 
 #[derive(Debug, Clone, Copy, Component, Reflect)]
 #[reflect(Component, Default)]
@@ -118,8 +134,8 @@ impl Default for ProjectionGame {
     fn default() -> Self {
         Self { 
             aspect_ratio: 1.0,
-            planes_a: Plane::new(1.0, 100.0), 
-            planes_b: Plane::new(2.0, 200.0), 
+            planes_a: Plane::new(1.0, Vec2::new(100.0, 100.0)), 
+            planes_b: Plane::new(2.0, Vec2::new(200.0, 200.0)), 
             near: 0.1,
             far: 1000.0,
         }
@@ -160,16 +176,19 @@ pub fn calculate_frustrum_from_planes(
     far:  f32,
 ) -> (f32, Projection) {
 
-    let dir = Vec3::new(
-        0.5*plane_b.size*aspect_ratio - 0.5*plane_a.size*aspect_ratio,
-        0.5*plane_b.size              - 0.5*plane_a.size,
-        plane_b.distance              - plane_a.distance,
-    ).normalize();
-    assert!(dir.x >= 0.0 && dir.y >= 0.0);
+    let [size_a, size_b] = [
+        if plane_a.size.y*aspect_ratio >= plane_a.size.x { plane_a.size.y } else { plane_a.size.x/aspect_ratio },
+        if plane_b.size.y*aspect_ratio >= plane_b.size.x { plane_b.size.y } else { plane_b.size.x/aspect_ratio },
+    ];
+
+    let corner_a = Vec3::new(0.5*size_a*aspect_ratio, 0.5*size_a, plane_a.distance);
+    let corner_b = Vec3::new(0.5*size_b*aspect_ratio, 0.5*size_b, plane_b.distance);
+    let dir = (corner_b - corner_a).normalize_or_zero();
+    assert!(dir.x >= 0.0 && dir.y >= 0.0, "{dir:?} | {aspect_ratio} | {plane_a:?} | {plane_b:?}");
 
     if dir.x == 0.0 && dir.y == 0.0 {
-        let right = 0.5*plane_a.size*aspect_ratio;
-        let top   = 0.5*plane_a.size;
+        let right = 0.5*size_a*aspect_ratio;
+        let top   = 0.5*size_a;
 
         (0.0, Projection::Orthographic(OrthographicProjection{
             near,
@@ -180,49 +199,18 @@ pub fn calculate_frustrum_from_planes(
             scale: 1.0
         }))
     } else {
-
-        let fov = Vec3::new(dir.x, 0.0, dir.z).normalize().angle_between(dir);
+        let fov        = 2.0*Vec3::new(0.0, dir.y, dir.z).angle_between(Vec3::Z);
         let projection = PerspectiveProjection{fov, aspect_ratio, near, far};
 
         // Calculate how far forward/backward a camera would need to be 
         // for the projection to line up plane_a and plane_b at their 
         // correct distances. ie. the frustrum defined by the planes may
         // have an origin behind or infront or behind the zero-origin.
-        let n_x  = plane_a.size/dir.x;
-        let dist = n_x*dir.z;
+        let n_y  = size_a/dir.y;
+        let dist = 0.5*n_y*dir.z;
         let diff = plane_a.distance - dist;
 
         (diff, Projection::Perspective(projection))
-    
-        /*
-        // TODO should I just calculate FOV?
-        //let n_z   = near/dir.z;
-        //let right = n_z*dir.x;
-        //let top   = n_z*dir.y;
-
-        // Terms A/B cancel out to 0 because view is symmetric
-        let c   =      (far+near)/(far-near);
-        let d   = -(2.0*far*near)/(far-near);
-        let m00 = near/right; // Terms simplify to (2.0*near)/(2.0*right), since view is symmetric
-        let m11 = near/top;   // Terms simplify to (2.0*near)/(2.0*top  ), since view is symmetric
-    
-        let projection = Mat4::from_cols(
-            Vec4::new(m00, 0.0, 0.0,  0.0),
-            Vec4::new(0.0, m11, 0.0,  0.0),
-            Vec4::new(0.0, 0.0,   c, -1.0),
-            Vec4::new(0.0, 0.0,   d,  0.0),
-        );
-
-        // Calculate how far forward/backward a camera would need to be 
-        // for the projection to line up plane_a and plane_b at their 
-        // correct distances. ie. the frustrum defined by the planes may
-        // have an origin behind or infront or behind the zero-origin.
-        let n_x  = plane_a.size/dir.x;
-        let dist = n_x*dir.z;
-        let diff = plane_a.distance - dist;
-
-        (diff, projection)
-        */
     }
 
 }
