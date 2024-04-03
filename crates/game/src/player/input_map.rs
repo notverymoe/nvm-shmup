@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{axes_digital, InputAxis, InputButton, PlayerInput, UnifiedInput};
+use crate::{axes_digital, InputAxis, InputButton, PlayerController, UnifiedInput};
 
 #[derive(Debug, Component)]
 pub struct PlayerInputConfig {
@@ -49,7 +49,7 @@ impl Default for PlayerInputConfig {
 }
 
 pub fn update_player_input(
-    mut q_player: Query<(&PlayerInputConfig, &mut PlayerInput)>,
+    mut q_player: Query<(&PlayerInputConfig, &mut PlayerController)>,
     button_kb: Res<ButtonInput<KeyCode>>,
     button_gp: Res<ButtonInput<GamepadButton>>,
     axis_gp: Res<Axis<GamepadAxis>>,
