@@ -14,11 +14,11 @@ impl Cooldown {
     }
 
     #[must_use]
-    pub fn is_active(&self) -> bool {
+    pub fn active(&self) -> bool {
         self.current > 0.0
     }
 
-    pub fn update(&mut self, delta_s: f32) -> bool {
+    pub fn reduce(&mut self, delta_s: f32) -> bool {
         self.current = (self.current - delta_s).max(0.0);
         self.current <= 0.0
     }

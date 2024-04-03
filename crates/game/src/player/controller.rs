@@ -44,7 +44,7 @@ pub fn update_player_firing(
 ) {
     q_player.iter_mut().for_each(|(mut controller, transform)| {
         let fire = core::mem::take(&mut controller.fire);
-        if controller.fire_cooldown.is_active() && !controller.fire_cooldown.update(time.delta_seconds()) {
+        if controller.fire_cooldown.active() && !controller.fire_cooldown.reduce(time.delta_seconds()) {
             return;
         }
 
