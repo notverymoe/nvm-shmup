@@ -4,12 +4,6 @@ use bevy::prelude::*;
 
 use crate::{DamageTarget, TeamPlayer, Transform2D};
 
-mod input_button;
-pub use input_button::*;
-
-mod input_axis;
-pub use input_axis::*;
-
 mod input_map;
 pub use input_map::*;
 
@@ -18,9 +12,6 @@ pub use input::*;
 
 mod controller;
 pub use controller::*;
-
-mod util;
-pub use util::*;
 
 #[derive(Debug, Default, Bundle)]
 pub struct PlayerBundle {
@@ -39,6 +30,6 @@ impl Plugin for PluginPlayer {
     fn build(&self, app: &mut App) {
         app
             .add_systems(First,  prepare_player_input)
-            .add_systems(Update, (update_keyboard_input, update_player_movement, update_player_firing).chain());
+            .add_systems(Update, (update_player_input, update_player_movement, update_player_firing).chain());
     }
 }

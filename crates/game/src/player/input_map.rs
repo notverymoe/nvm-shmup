@@ -2,11 +2,11 @@
 
 use bevy::prelude::*;
 
-use super::{input::PlayerInput, input_axis::InputAxis, input_button::InputButton, util::axes_digital};
+use crate::{axes_digital, InputAxis, InputButton, PlayerInput, UnifiedInput};
 
 #[derive(Debug, Component)]
 pub struct PlayerInputConfig {
-    pub force_digital: bool,
+    pub digital_deadzone: Option<f32>,
     pub gamepad: Option<Gamepad>,
     pub axis_x: Vec<InputAxis>,
     pub axis_y: Vec<InputAxis>,
@@ -16,7 +16,7 @@ pub struct PlayerInputConfig {
 impl Default for PlayerInputConfig {
     fn default() -> Self {
         Self { 
-            force_digital: true,
+            digital_deadzone: Some(0.2),
             gamepad: None,
             axis_x: vec![
                 InputAxis::Buttons([
@@ -48,18 +48,23 @@ impl Default for PlayerInputConfig {
     }
 }
 
-pub fn update_keyboard_input(
+pub fn update_player_input(
     mut q_player: Query<(&PlayerInputConfig, &mut PlayerInput)>,
     button_kb: Res<ButtonInput<KeyCode>>,
     button_gp: Res<ButtonInput<GamepadButton>>,
     axis_gp: Res<Axis<GamepadAxis>>,
 ) {
     q_player.iter_mut().for_each(|(config, mut player)| {
-        let move_dir = Vec2::new(
-            config.axis_x.iter().map(|a| a.get(&button_kb, &button_gp, &axis_gp, config.gamepad)).sum::<f32>(),
-            config.axis_y.iter().map(|a| a.get(&button_kb, &button_gp, &axis_gp, config.gamepad)).sum::<f32>()
-        );
-        player.move_dir += if config.force_digital { axes_digital(move_dir, 0.2) } else { move_dir };
-        player.fire = config.fire.iter().any(|v| v.pressed(&button_kb, &button_gp, &axis_gp, config.gamepad));
+        let input = UnifiedInput::new(&button_kb, &button_gp, &axis_gp, config.gamepad);
+        player.move_dir += apply_digital(input.axes_2(&config.axis_x, &config.axis_y), config.digital_deadzone);
+        player.fire = input.pressed_any(&config.fire);
     });
+}
+
+fn apply_digital(value: Vec2, deadzone: Option<f32>) -> Vec2 {
+    if let Some(deadzone) = deadzone {
+        axes_digital(value, deadzone)
+    } else {
+        value
+    }
 }

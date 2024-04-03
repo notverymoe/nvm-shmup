@@ -23,3 +23,6 @@ pub use damage::*;
 
 mod transform;
 pub use transform::*;
+
+mod input;
+pub use input::*;

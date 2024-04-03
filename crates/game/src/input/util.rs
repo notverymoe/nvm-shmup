@@ -2,7 +2,8 @@
 
 use bevy::prelude::*;
 
-#[must_use] pub fn axes_digital(dir: Vec2, deadzone: f32) -> Vec2 {
+#[must_use] 
+pub fn axes_digital(dir: Vec2, deadzone: f32) -> Vec2 {
     if dir.length_squared() <= deadzone*deadzone {
         Vec2::ZERO
     } else {
@@ -10,6 +11,7 @@ use bevy::prelude::*;
     }
 }
 
-#[must_use] pub fn normalize_axis(amount: f32) -> f32 {
+#[must_use] 
+pub fn normalize_axis(amount: f32) -> f32 {
     amount.abs().min(1.0).max(0.0) * amount.signum()
 }
