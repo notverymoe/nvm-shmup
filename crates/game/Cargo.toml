@@ -7,6 +7,7 @@ edition = "2021"
 bevy        = { workspace = true }
 nvm_curve   = { workspace = true }
 nvm_collide = { workspace = true }
+nvm_str_id  = { workspace = true }
 
 [lints]
 workspace = true

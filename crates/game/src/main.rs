@@ -5,7 +5,10 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, BundleProjectile, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, TeamEnemy, Transform2D, TransformSync};
+use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginProjectile, PluginProjectilesNew, PluginTransform, PluginsGameCamera, Prism, ProjectileStyle, ProjectileStyleDefinition, ProjectileStyles, ProjectionGame, ProjectionGameDebug, Shape, SpawnProjectile, Team, Transform2D};
+
+
+pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
 fn main() {
     App::new()
@@ -14,11 +17,10 @@ fn main() {
         .add_plugins(PluginPlayer)
         .add_plugins(PluginTransform)
         .add_plugins(PluginProjectile)
+        .add_plugins(PluginProjectilesNew)
         .add_systems(Startup, setup)
         .add_systems(PreUpdate, |
             mut commands: Commands, 
-            mut meshes: ResMut<Assets<Mesh>>,
-            mut materials: ResMut<Assets<StandardMaterial>>,
             time: Res<Time>, 
             mut accum: Local<f32>,
         | {
@@ -26,17 +28,7 @@ fn main() {
             if *accum < 0.2 { return; }
             *accum -= 0.2;
 
-            commands.spawn((
-                BundleProjectile::bullet(TeamEnemy, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y, 0.25, 1),
-                PbrBundle { // TODO improve on this
-                    mesh: meshes.add(Sphere::new(0.25)),
-                    transform: Transform::from_translation(Vec2::new(0.0, 0.0).extend(0.0)),
-                    material: materials.add(Color::from(Colors::RED)),
-                    ..default()
-                },
-                TransformSync
-            ));
-            
+            commands.add(SpawnProjectile::new(Team::Enemy, STYLE_BULLET, 1, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y));
         })
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
@@ -55,9 +47,18 @@ pub fn update_tilt(
 
 pub fn setup(
     mut commands: Commands,
+    mut projectile_styles: ResMut<ProjectileStyles>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+
+    projectile_styles.defs.insert(STYLE_BULLET, ProjectileStyleDefinition{
+        shape: Shape::Circle(0.25),
+        mesh: meshes.add(Sphere::new(0.25)),
+        material_enemy:  materials.add(Color::from(Colors::RED)),
+        material_player: materials.add(Color::from(Colors::AQUA)),
+    });
+
     commands.spawn((
         GameCameraBundle{
             projection: ProjectionGame{
@@ -76,6 +77,10 @@ pub fn setup(
         PlayerBundle {
             damage_sink: DamageTarget {
                 shape: game::Shape::Circle(2.0),
+                ..default()
+            },
+            controller: PlayerController {
+                fire_style: STYLE_BULLET,
                 ..default()
             },
             ..default()

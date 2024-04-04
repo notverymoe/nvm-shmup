@@ -1,8 +1,8 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use bevy::{color::palettes::css as Colors, prelude::*};
+use bevy::prelude::*;
 
-use crate::{BundleProjectile, Cooldown, TeamPlayer, Transform2D, TransformSync};
+use crate::{Cooldown, ProjectileStyle, SpawnProjectile, Team, Transform2D};
 
 #[derive(Debug, Component)]
 pub struct PlayerController {
@@ -10,6 +10,7 @@ pub struct PlayerController {
     pub move_dir:      Vec2,
     pub fire:          bool,
     pub fire_cooldown: Cooldown,
+    pub fire_style:    ProjectileStyle,
 }
 
 
@@ -20,6 +21,7 @@ impl Default for PlayerController {
             move_dir:      Vec2::ZERO,
             fire:          false,
             fire_cooldown: Cooldown::new(0.2),
+            fire_style:    "".into(),
         }
     }
 }
@@ -39,8 +41,6 @@ pub fn update_player_firing(
     mut q_player: Query<(&mut PlayerController, &Transform2D)>,
     mut commands: Commands,
     time: Res<Time>,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     q_player.iter_mut().for_each(|(mut controller, transform)| {
         let fire = core::mem::take(&mut controller.fire);
@@ -50,16 +50,7 @@ pub fn update_player_firing(
 
         if fire {
             controller.fire_cooldown.trigger();
-            commands.spawn((
-                BundleProjectile::bullet(TeamPlayer, transform.position.current, Vec2::Y * 100.0, 0.25, 1),
-                PbrBundle { // TODO improve on this
-                    mesh: meshes.add(Sphere::new(0.25)),
-                    transform: Transform::from_translation(transform.position.current.extend(0.0)),
-                    material: materials.add(Color::from(Colors::BLUE)),
-                    ..default()
-                },
-                TransformSync
-            ));
+            commands.add(SpawnProjectile::new(Team::Player, controller.fire_style, 1, transform.position.current, Vec2::Y * 100.0));
         }
     });
 }
