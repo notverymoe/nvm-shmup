@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{DamageTarget, TeamPlayer, Transform2D};
+use crate::{damage::prelude::*, tags::prelude::*, Transform2D};
 
 mod input_map;
 pub use input_map::*;
@@ -14,7 +14,7 @@ pub use controller::*;
 pub struct PlayerBundle {
     pub input_config:  PlayerInputConfig,
     pub controller:    PlayerController,
-    pub damage_sink:   DamageTarget, 
+    pub target:        Target, 
     pub transform:     Transform2D,
     pub team:          TeamPlayer,
 }

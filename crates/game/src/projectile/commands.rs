@@ -2,9 +2,9 @@
 
 use bevy::{ecs::world::Command, prelude::*};
 
-use crate::{DamageSourceOnce, ProjectileLinear, TeamEnemy, TeamPlayer, Transform2D, TransformSync};
+use crate::{tags::prelude::*, Transform2D, TransformSync};
 
-use super::styles::{ProjectileStyles, ProjectileStyle};
+use super::{plugin::{ProjectileDamage, ProjectileVelocity}, styles::{ProjectileStyle, ProjectileStyles}};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Team {
@@ -13,16 +13,16 @@ pub enum Team {
 }
 
 pub trait CommandsSpawnProjectile {
-    fn spawn_projectile(&mut self, team: Team, style: ProjectileStyle, damage: u32, origin: Vec2, velocity: Vec2);
-    fn spawn_projectile_with<T: Bundle>(&mut self, team: Team, style: ProjectileStyle, damage: u32, origin: Vec2, velocity: Vec2, bundle: T);
+    fn spawn_projectile(&mut self, team: Team, style: ProjectileStyle, damage: f32, origin: Vec2, velocity: Vec2);
+    fn spawn_projectile_with<T: Bundle>(&mut self, team: Team, style: ProjectileStyle, damage: f32, origin: Vec2, velocity: Vec2, bundle: T);
 }
 
 impl<'w, 's> CommandsSpawnProjectile for Commands<'w, 's> {
-    fn spawn_projectile(&mut self, team: Team, style: ProjectileStyle, damage: u32, origin: Vec2, velocity: Vec2) {
+    fn spawn_projectile(&mut self, team: Team, style: ProjectileStyle, damage: f32, origin: Vec2, velocity: Vec2) {
         self.add(SpawnProjectile::new(team, style, damage, origin, velocity));
     }
 
-    fn spawn_projectile_with<T: Bundle>(&mut self, team: Team, style: ProjectileStyle, damage: u32, origin: Vec2, velocity: Vec2, bundle: T) {
+    fn spawn_projectile_with<T: Bundle>(&mut self, team: Team, style: ProjectileStyle, damage: f32, origin: Vec2, velocity: Vec2, bundle: T) {
         self.add(SpawnProjectile::new(team, style, damage, origin, velocity).with(bundle));
     }
 }
@@ -30,7 +30,7 @@ impl<'w, 's> CommandsSpawnProjectile for Commands<'w, 's> {
 pub struct SpawnProjectile<T: Bundle = ()> {
     pub team:     Team,
     pub style:    ProjectileStyle,
-    pub damage:   u32,
+    pub damage:   f32,
     pub origin:   Vec2,
     pub velocity: Vec2,
     pub additional: T,
@@ -42,7 +42,7 @@ impl SpawnProjectile<()> {
     pub const fn new(
         team: Team,
         style: ProjectileStyle,
-        damage: u32,
+        damage: f32,
         origin: Vec2,
         velocity: Vec2,
     ) -> Self {
@@ -85,13 +85,12 @@ impl<T: Bundle> Command for SpawnProjectile<T> {
                 ..default()
             };
 
-            let collider = DamageSourceOnce{
+            let collider = ProjectileDamage{
                 shape:  style.shape,
                 amount: self.damage,
-                hit:    None,
             };
 
-            let velocity = ProjectileLinear{
+            let velocity = ProjectileVelocity{
                 velocity: self.velocity
             };
 

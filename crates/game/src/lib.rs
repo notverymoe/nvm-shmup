@@ -18,16 +18,15 @@ pub use interp::*;
 mod util;
 pub use util::*;
 
-mod damage;
-pub use damage::*;
-
 mod transform;
 pub use transform::*;
 
 mod input;
 pub use input::*;
 
-pub mod projectile;
-
 mod cooldown;
 pub use cooldown::*;
+
+pub mod damage;
+pub mod projectile;
+pub mod tags;

@@ -44,13 +44,13 @@ pub fn update_player_firing(
 ) {
     q_player.iter_mut().for_each(|(mut controller, transform)| {
         let fire = core::mem::take(&mut controller.fire);
-        if controller.fire_cooldown.active() && !controller.fire_cooldown.reduce(time.delta_seconds()) {
+        if controller.fire_cooldown.active(time.elapsed_seconds_f64()) {
             return;
         }
 
         if fire {
-            controller.fire_cooldown.trigger();
-            commands.spawn_projectile(Team::Player, controller.fire_style, 1, transform.position.current, Vec2::Y * 100.0);
+            controller.fire_cooldown.trigger(time.elapsed_seconds_f64());
+            commands.spawn_projectile(Team::Player, controller.fire_style, 1.0, transform.position.current, Vec2::Y * 100.0);
         }
     });
 }

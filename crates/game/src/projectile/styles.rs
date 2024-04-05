@@ -3,11 +3,11 @@
 use bevy::{prelude::*, utils::HashMap};
 use nvm_str_id::newtype_str_id;
 
-use crate::Shape;
+use crate::damage::prelude::*;
 
 newtype_str_id!(pub ProjectileStyle);
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Default, Clone, Resource)]
 pub struct ProjectileStyles {
     pub defs: HashMap<ProjectileStyle, ProjectileStyleDefinition>,
 }

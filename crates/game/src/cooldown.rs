@@ -1,30 +1,24 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct Cooldown {
-    pub length:  f32,
-    pub current: f32,
+    pub duration: f64,
+    pub timeout:  f64,
 }
 
 impl Cooldown {
 
     #[must_use]
-    pub const fn new(length: f32) -> Self {
-        Self{length, current: 0.0}
+    pub const fn new(duration: f64) -> Self {
+        Self{duration, timeout: 0.0}
     }
 
     #[must_use]
-    pub fn active(&self) -> bool {
-        self.current > 0.0
+    pub fn active(&self, time_seconds: f64) -> bool {
+        self.timeout > time_seconds
     }
 
-    pub fn reduce(&mut self, delta_s: f32) -> bool {
-        self.current = (self.current - delta_s).max(0.0);
-        self.current <= 0.0
+    pub fn trigger(&mut self, time_seconds: f64) {
+        self.timeout = time_seconds + self.duration;
     }
-
-    pub fn trigger(&mut self) {
-        self.current = self.length;
-    }
-
 }

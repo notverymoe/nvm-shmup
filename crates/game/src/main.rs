@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{projectile::prelude::*, apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, Shape, Transform2D};
+use game::{projectile::prelude::*, damage::prelude::*, apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, Transform2D};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
@@ -16,7 +16,6 @@ fn main() {
         .add_plugins(PluginPlayer)
         .add_plugins(PluginTransform)
         .add_plugins(PluginProjectile)
-        .add_plugins(PluginProjectilesNew)
         .add_systems(Startup, setup)
         .add_systems(PreUpdate, |
             mut commands: Commands, 
@@ -27,7 +26,7 @@ fn main() {
             if *accum < 0.2 { return; }
             *accum -= 0.2;
 
-            commands.spawn_projectile(Team::Enemy, STYLE_BULLET, 1, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y);
+            commands.spawn_projectile(Team::Enemy, STYLE_BULLET, 1.0, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y);
         })
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
@@ -74,8 +73,9 @@ pub fn setup(
 
     commands.spawn((
         PlayerBundle {
-            damage_sink: DamageTarget {
-                shape: game::Shape::Circle(2.0),
+            target: Target {
+                shape: Shape::Circle(2.0),
+                limit: f32::MAX, // DEBUG
                 ..default()
             },
             controller: PlayerController {
