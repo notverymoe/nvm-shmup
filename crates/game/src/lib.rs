@@ -18,3 +18,14 @@ pub mod damage;
 pub mod projectile;
 pub mod path;
 pub mod tags;
+pub mod plugin;
+
+pub mod prelude {
+    pub use super::input::prelude::*;
+    pub use super::transform::prelude::*;
+    pub use super::damage::prelude::*;
+    pub use super::projectile::prelude::*;
+    pub use super::tags::prelude::*;
+    pub use super::plugin::*;
+}
+

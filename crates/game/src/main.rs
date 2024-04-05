@@ -5,17 +5,14 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{projectile::prelude::*, damage::prelude::*, transform::prelude::*, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug};
+use game::{prelude::*, GameCameraBundle, Plane, PlayerBundle, PlayerController, Prism, ProjectionGame, ProjectionGameDebug};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_plugins(PluginsGameCamera)
-        .add_plugins(PluginPlayer)
-        .add_plugins(PluginTransform)
-        .add_plugins(PluginProjectile)
+        .add_plugins(PluginsGame)
         .add_systems(Startup, setup)
         .add_systems(PreUpdate, |
             mut commands: Commands, 
