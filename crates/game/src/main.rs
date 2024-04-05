@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{prelude::*, GameCameraBundle, Plane, PlayerBundle, PlayerController, Prism, ProjectionGame, ProjectionGameDebug};
+use game::{prelude::*, update_player_movement, GameCameraBundle, Plane, PlayerBundle, PlayerController, Prism, ProjectionGame, ProjectionGameDebug};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
@@ -14,17 +14,37 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugins(PluginsGame)
         .add_systems(Startup, setup)
-        .add_systems(PreUpdate, |
+        .add_systems(Update, (|
             mut commands: Commands, 
             time: Res<Time>, 
             mut accum: Local<f32>,
+            player: Query<&Transform2D, With<PlayerController>>,
         | {
             *accum += time.delta_seconds();
             if *accum < 0.2 { return; }
             *accum -= 0.2;
 
-            commands.spawn_projectile(Team::Enemy, STYLE_BULLET, 1.0, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y);
-        })
+            let player = player.single();
+            let player_pos = player.position.previous;
+            let player_vel = player.position.delta()/time.delta_seconds();
+            let deg_45 = core::f32::consts::FRAC_PI_4;
+
+            commands.spawn_projectile(
+                Team::Enemy,        // Who owns this projectile?
+                STYLE_BULLET,       // Projectile visuals / collider
+                1.0,                // Projectile damage
+                ProjectileAim::new(
+                    Vec2::Y*45.0,   // Projectile firing origin
+                    -Vec2::Y,       // Projectile direction
+                    40.0            // Projectile speed
+                ).aim_predictive(
+                    player_pos,     // Target's starting position
+                    player_vel,     // Target's estimated velocity
+                    f32::MAX,       // Predict an unlimited distance into the future
+                    deg_45,         // Limit aim to 45deg from direction
+                )
+            );
+        }).after(update_player_movement))
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();
 }

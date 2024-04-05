@@ -33,14 +33,13 @@ pub struct ProjectileDamage {
     pub amount: f32,
 }
 
-#[derive(Debug, Clone, Copy, Component)]
-pub struct ProjectileVelocity {
-    pub velocity: Vec2,
-}
+#[derive(Debug, Clone, Copy, Component, Deref, DerefMut)]
+pub struct ProjectileSpeed(pub f32);
 
-pub fn integrate_projectiles_motion(mut q: Query<(&mut Transform2D, &ProjectileVelocity)>, time: Res<Time>) {
-    q.iter_mut().for_each(|(mut transform, projectile)| {
-        transform.position.current += projectile.velocity * time.delta_seconds();
+pub fn integrate_projectiles_motion(mut q: Query<(&mut Transform2D, &ProjectileSpeed)>, time: Res<Time>) {
+    q.iter_mut().for_each(|(mut transform, &ProjectileSpeed(speed))| {
+        let direction = transform.rotation.current;
+        transform.position.current += direction * speed * time.delta_seconds();
     });
 }
 

@@ -50,7 +50,7 @@ pub fn update_player_firing(
 
         if fire {
             controller.fire_cooldown.trigger(time.elapsed_seconds_f64());
-            commands.spawn_projectile(Team::Player, controller.fire_style, 1.0, transform.position.current, Vec2::Y * 100.0);
+            commands.spawn_projectile(Team::Player, controller.fire_style, 1.0, ProjectileAim::new(transform.position.current, Vec2::Y, 100.0));
         }
     });
 }

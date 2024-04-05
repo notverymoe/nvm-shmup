@@ -9,7 +9,7 @@ pub struct PluginTransform;
 impl Plugin for PluginTransform {
     fn build(&self, app: &mut App) {
         app
-            .add_systems(First,      apply_transform_2ds)
+            .add_systems(Last,       apply_transform_2ds)
             .add_systems(PostUpdate, propogate_transform_2ds.before(propagate_transforms).before(sync_simple_transforms));
     }
 }
