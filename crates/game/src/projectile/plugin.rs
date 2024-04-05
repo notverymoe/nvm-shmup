@@ -3,7 +3,8 @@
 use bevy::prelude::*;
 use nvm_collide::prelude::{RayCaster, RayIntersection, ShapeCombined};
 
-use crate::{damage::prelude::*, tags::prelude::*, transform::prelude::*, update_player_firing, update_player_movement};
+use crate::{damage::prelude::*, tags::prelude::*, transform::prelude::*};
+
 use super::styles::ProjectileStyles;
 
 pub struct PluginProjectile;
@@ -20,9 +21,8 @@ impl Plugin for PluginProjectile {
                         do_projectile_hits::<TeamPlayer, TeamEnemy >,
                     ),
                 )
+                .in_set(SystemProjectileUpdate)
                 .chain()
-                .after(update_player_movement)
-                .after(update_player_firing)
             );
     }
 }

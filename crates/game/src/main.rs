@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{prelude::*, update_player_movement, GameCameraBundle, Plane, PlayerBundle, PlayerController, Prism, ProjectionGame, ProjectionGameDebug};
+use game::{prelude::*, GameCameraBundle, Plane, PlayerBundle, PlayerController, Prism, ProjectionGame, ProjectionGameDebug};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
@@ -44,8 +44,8 @@ fn main() {
                     deg_45,         // Limit aim to 45deg from direction
                 )
             );
-        }).after(update_player_movement))
-        .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
+        }).after(SystemPlayerMovement))
+        .add_systems(PostUpdate, update_tilt)
         .run();
 }
 
