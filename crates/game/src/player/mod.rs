@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{damage::prelude::*, tags::prelude::*, Transform2D};
+use crate::{damage::prelude::*, tags::prelude::*, transform::prelude::*};
 
 mod input_map;
 pub use input_map::*;

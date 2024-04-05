@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{projectile::prelude::*, damage::prelude::*, apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, Transform2D};
+use game::{projectile::prelude::*, damage::prelude::*, transform::prelude::*, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 

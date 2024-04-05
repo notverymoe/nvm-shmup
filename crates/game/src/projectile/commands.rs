@@ -2,7 +2,7 @@
 
 use bevy::{ecs::world::Command, prelude::*};
 
-use crate::{tags::prelude::*, Transform2D, TransformSync};
+use crate::{tags::prelude::*, transform::prelude::*};
 
 use super::{plugin::{ProjectileDamage, ProjectileVelocity}, styles::{ProjectileStyle, ProjectileStyles}};
 

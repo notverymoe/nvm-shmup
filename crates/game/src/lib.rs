@@ -15,11 +15,6 @@ pub use prism::*;
 mod interp;
 pub use interp::*;
 
-mod util;
-pub use util::*;
-
-mod transform;
-pub use transform::*;
 
 mod input;
 pub use input::*;
@@ -27,6 +22,7 @@ pub use input::*;
 mod cooldown;
 pub use cooldown::*;
 
+pub mod transform;
 pub mod damage;
 pub mod projectile;
 pub mod tags;

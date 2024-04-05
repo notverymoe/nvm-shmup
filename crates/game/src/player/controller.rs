@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{Cooldown, projectile::prelude::*, Transform2D};
+use crate::{projectile::prelude::*, transform::prelude::*, Cooldown};
 
 #[derive(Debug, Component)]
 pub struct PlayerController {

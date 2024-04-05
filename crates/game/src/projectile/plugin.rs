@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use nvm_collide::prelude::{RayCaster, RayIntersection, ShapeCombined};
 
-use crate::{damage::prelude::*, tags::prelude::*, update_player_firing, update_player_movement, Transform2D};
+use crate::{damage::prelude::*, tags::prelude::*, transform::prelude::*, update_player_firing, update_player_movement};
 use super::styles::ProjectileStyles;
 
 pub struct PluginProjectile;
