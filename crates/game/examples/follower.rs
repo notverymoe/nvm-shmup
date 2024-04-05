@@ -1,7 +1,7 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
 use bevy::{prelude::*, diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin}};
-use game::Path;
+use game::path::Path;
 use nvm_curve::{Bezier, Curve};
 
 fn main() {
