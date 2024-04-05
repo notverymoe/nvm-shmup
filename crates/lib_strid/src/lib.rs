@@ -7,7 +7,7 @@ pub use smol_str::*;
 macro_rules! newtype_str_id {
     ($vis:vis $name:ident) => {
         
-        #[derive(Debug, Clone)]
+        #[derive(Debug, Default, Clone, Copy, Eq, PartialEq, Hash)]
         #[repr(transparent)]
         $vis struct $name($crate::SmolStr);
 
@@ -29,29 +29,6 @@ macro_rules! newtype_str_id {
 
             $vis fn to_raw(&self) -> u128 {
                 self.0.to_raw()
-            }
-        }
-
-        impl core::default::Default for $name {
-            fn default() -> Self {
-                Self(Default::default())
-            }
-        }
-
-        unsafe impl core::marker::Send for $name { }
-        unsafe impl core::marker::Sync for $name { }
-        impl core::marker::Copy for $name { }
-        impl core::cmp::Eq      for $name { }
-
-        impl core::cmp::PartialEq for $name {
-            fn eq(&self, other: &Self) -> bool {
-                self.0.eq(&other.0)
-            }
-        }
-
-        impl core::hash::Hash for $name {
-            fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-                self.0.hash(state);
             }
         }
 
