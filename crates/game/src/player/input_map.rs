@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{axes_digital, InputAxis, InputButton, PlayerController, UnifiedInput};
+use crate::{input::prelude::*, PlayerController};
 
 #[derive(Debug, Component)]
 pub struct PlayerInputConfig {

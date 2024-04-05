@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::{InputButton, util::normalize_axis};
+use super::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
 pub enum InputAxis {

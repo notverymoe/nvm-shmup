@@ -5,7 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{projectile::prelude::*, damage::prelude::*, transform::prelude::*, interp_orientation, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug};
+use game::{projectile::prelude::*, damage::prelude::*, transform::prelude::*, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
@@ -75,7 +75,7 @@ pub fn setup(
         PlayerBundle {
             target: Target {
                 shape: Shape::Circle(2.0),
-                limit: f32::MAX, // DEBUG
+                limit: f32::MAX, // TODO for DEBUG testing
                 ..default()
             },
             controller: PlayerController {
