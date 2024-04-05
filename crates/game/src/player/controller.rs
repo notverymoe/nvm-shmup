@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use crate::{Cooldown, ProjectileStyle, SpawnProjectile, Team, Transform2D};
+use crate::{Cooldown, projectile::prelude::*, Transform2D};
 
 #[derive(Debug, Component)]
 pub struct PlayerController {
@@ -50,7 +50,7 @@ pub fn update_player_firing(
 
         if fire {
             controller.fire_cooldown.trigger();
-            commands.add(SpawnProjectile::new(Team::Player, controller.fire_style, 1, transform.position.current, Vec2::Y * 100.0));
+            commands.spawn_projectile(Team::Player, controller.fire_style, 1, transform.position.current, Vec2::Y * 100.0);
         }
     });
 }

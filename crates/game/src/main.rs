@@ -5,8 +5,7 @@ use core::f32::consts::TAU;
 use bevy::{
     color::palettes::css as Colors, pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*
 };
-use game::{apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginProjectile, PluginProjectilesNew, PluginTransform, PluginsGameCamera, Prism, ProjectileStyle, ProjectileStyleDefinition, ProjectileStyles, ProjectionGame, ProjectionGameDebug, Shape, SpawnProjectile, Team, Transform2D};
-
+use game::{projectile::prelude::*, apply_transform_2ds, calculate_ship_orientation_target, interp_orientation, DamageTarget, GameCameraBundle, Plane, PlayerBundle, PlayerController, PluginPlayer, PluginProjectile, PluginTransform, PluginsGameCamera, Prism, ProjectionGame, ProjectionGameDebug, Shape, Transform2D};
 
 pub const STYLE_BULLET: ProjectileStyle = ProjectileStyle::from_name("bullet");
 
@@ -28,7 +27,7 @@ fn main() {
             if *accum < 0.2 { return; }
             *accum -= 0.2;
 
-            commands.add(SpawnProjectile::new(Team::Enemy, STYLE_BULLET, 1, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y));
+            commands.spawn_projectile(Team::Enemy, STYLE_BULLET, 1, Vec2::new(10.0, 10.0), -25.0 * Vec2::Y);
         })
         .add_systems(PostUpdate, update_tilt.before(apply_transform_2ds))
         .run();

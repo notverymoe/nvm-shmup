@@ -27,8 +27,7 @@ pub use transform::*;
 mod input;
 pub use input::*;
 
-mod projectile;
-pub use projectile::*;
+pub mod projectile;
 
 mod cooldown;
 pub use cooldown::*;
