@@ -17,8 +17,8 @@ impl Plugin for PluginProjectile {
                 (
                     integrate_projectiles_motion,
                     (
-                        do_projectile_hits::<TeamEnemy,  TeamPlayer>,
-                        do_projectile_hits::<TeamPlayer, TeamEnemy >,
+                        do_projectile_hits::<TeamEnemy >,
+                        do_projectile_hits::<TeamPlayer>,
                     ),
                 )
                 .in_set(SystemProjectileUpdate)
@@ -43,9 +43,9 @@ pub fn integrate_projectiles_motion(mut q: Query<(&mut Transform2D, &ProjectileS
     });
 }
 
-pub fn do_projectile_hits<TagTarget: Component, TagSource: Component>(
-    mut q_sources: Query<(Entity, &ProjectileDamage, &Transform2D), With<TagSource>>,
-    mut q_targets: Query<(Entity, &mut Target,       &Transform2D), With<TagTarget>>,
+pub fn do_projectile_hits<Tag: Component>(
+    mut q_sources: Query<(Entity, &ProjectileDamage, &Transform2D),    With<Tag>>,
+    mut q_targets: Query<(Entity, &mut Target,       &Transform2D), Without<Tag>>,
     mut commands: Commands,
     time: Res<Time>,
 ) {

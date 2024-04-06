@@ -22,7 +22,7 @@ impl ProjectileAim {
     pub fn aim_at(self, target: Vec2, arc: f32) -> Self {
         if let Some(dir) = (target - self.origin).try_normalize() {
             let aim_angle = self.direction.perp_dot(dir);
-            let aim_angle = aim_angle.signum() * aim_angle.abs().min(arc.cos());
+            let aim_angle = aim_angle.signum() * aim_angle.abs().min(arc.sin());
             let aim_angle = Vec2::new((1.0 - aim_angle*aim_angle).sqrt(), aim_angle);
             Self {
                 origin:    self.origin,
@@ -32,6 +32,11 @@ impl ProjectileAim {
         } else {
             self
         }
+    }
+
+    #[must_use]
+    pub fn aim_ahead(self, target: Vec2, target_velocity: Vec2, time: f32, arc: f32) -> Self {
+        self.aim_at(target + target_velocity*time, arc)
     }
 
     #[must_use]

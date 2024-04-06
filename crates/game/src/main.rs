@@ -25,9 +25,9 @@ fn main() {
             *accum -= 0.2;
 
             let player = player.single();
-            let player_pos = player.position.previous;
             let player_vel = player.position.delta()/time.delta_seconds();
-            let deg_45 = core::f32::consts::FRAC_PI_4;
+            let player_pos = player.position.previous;
+            let deg_80 = 80.0_f32.to_radians();
 
             commands.spawn_projectile(
                 Team::Enemy,        // Who owns this projectile?
@@ -36,13 +36,8 @@ fn main() {
                 ProjectileAim::new(
                     Vec2::Y*45.0,   // Projectile firing origin
                     -Vec2::Y,       // Projectile direction
-                    40.0            // Projectile speed
-                ).aim_predictive(
-                    player_pos,     // Target's starting position
-                    player_vel,     // Target's estimated velocity
-                    f32::MAX,       // Predict an unlimited distance into the future
-                    deg_45,         // Limit aim to 45deg from direction
-                )
+                    80.0            // Projectile speed
+                ).aim_ahead(player_pos, player_vel, 0.5, deg_80)
             );
         }).after(SystemPlayerMovement))
         .add_systems(PostUpdate, update_tilt)
