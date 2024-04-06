@@ -10,3 +10,4 @@ These are just some notes I've picked up from playing and watching people play s
 
 - Most bullets should have some kind of directional indicator. A trail or directed shape. 
 - Patterns designed for microdoging should use visually small/narrow bullets to make gaps clearer.
+- Homing bullets should be destroyable
